@@ -1,105 +1,160 @@
-#include <SFML/Graphics.hpp>
-
-#include <iostream>
-
-int windowX = 1000; //initial window width
-int windowY = 600; //initial window height
-int speed = 10; //how fast we move
+#include "BreakoutMain.h"
+#include <conio.h>
 
 int main()
 {
+	Game myGame;
+	if (!myGame.Start())
+	{
+		//somthing failed
+		return EXIT_FAILURE;
+	}
+	return myGame.Update();
+}
 
-	//shape stuff
-	sf::Vector2f rectSize = sf::Vector2f(100.f, 50.f); //size of our rectangle in pixels
-	sf::Vector2f rectPos = sf::Vector2f((windowX / 2) - (rectSize.x / 2), (windowY / 2) - (rectSize.y / 2)); //centre
-	sf::Color rectColour = sf::Color(255, 255, 0, 255); //0-255 for all 4, r,g,b,a
+Brick brick;
+std::vector<Brick> Bricks(31, Brick(brick));
 
-	//window stuff
-	sf::RenderWindow window(sf::VideoMode(windowX, windowY), "Breakout Clone!");
-	window.setFramerateLimit(60); //stop game going lightspeed
+bool Game::Start() //Setup our game
+{
+	//load sound buffers!
+	paddleSB.loadFromFile("SFX/paddlebounce.wav");
+	wallSB.loadFromFile("SFX/wallbounce.wav");
+	bricksSB.loadFromFile("SFX/blockbounce.wav");
 
-	//paddle stuff
-	sf::RectangleShape paddle(rectSize); //our paddle object
-	paddle.setFillColor(rectColour); //set colour
-	paddle.setPosition(rectPos); //set position
+	font.loadFromFile("arial.ttf");
+	scoreText.setFont(font);
+	livesText.setFont(font);
+	scoreText.setPosition(0, windowHeight - 50);
+	livesText.setPosition(windowWidth - 100, windowHeight - 50);
+	scoreText.setCharacterSize(24);
+	livesText.setCharacterSize(24);
+	scoreText.setFillColor(sf::Color::White);
+	livesText.setFillColor(sf::Color::White);
 
-	//ball stuff
-	sf::CircleShape ball(10.f); //create ball
-	ball.setFillColor(sf::Color::Cyan);
-	sf::Vector2f velocity = sf::Vector2f(0.f, 0.f);//setup velocity
-	velocity.x = rand() % 10; //initial x will be random
-	velocity.y = -5;
-	//move start position of the ball up by the height of the paddle
-	ball.setPosition(sf::Vector2f(rectPos.x, rectPos.y - rectSize.y));
+	//setup window
+	sf::VideoMode vMode(windowWidth, windowHeight);
+	window.create(vMode, "Breakout Clone!");
+	window.setFramerateLimit(60);
 
-	//borders stuff
-	sf::RectangleShape top;
-	sf::RectangleShape bottom;
-	sf::RectangleShape left;
-	sf::RectangleShape right;
-	top.setSize(sf::Vector2f(windowX, 1));
+	//setup bricks
+	srand(time(NULL));
+	for (int i = 0; i < 31; i++)
+	{
+		Bricks[i].bShape.setSize(sf::Vector2f(100, 50));
+		//bottom row
+		if (i <= 10)
+		{
+			Bricks[i].bShape.setFillColor(sf::Color(rand() % 35 + 180, 0, 0, 255));
+			Bricks[i].bShape.setPosition(100 * i, 0);
+		}
+		//top row
+		else if (i > 20)
+		{
+			Bricks[i].bShape.setFillColor(sf::Color(0, rand() % 35 + 180, 0, 255));
+			Bricks[i].bShape.setPosition(100 * (i - 21), 100);
+		}
+		//middle row
+		else if (i > 10)
+		{
+			Bricks[i].bShape.setFillColor(sf::Color(0, 0, rand() % 35 + 180, 255));
+			Bricks[i].bShape.setPosition(100 * (i - 11), 50);
+		}
+	}
+	//setup borders
+	top.setSize(sf::Vector2f(windowWidth, 1));
 	top.setPosition(0, 0);
 	top.setFillColor(sf::Color::Black);
-	bottom.setSize(sf::Vector2f(windowX, 1));
-	bottom.setPosition(sf::Vector2f(0, windowY - 1));
+	bottom.setSize(sf::Vector2f(windowWidth, 1));
+	bottom.setPosition(sf::Vector2f(0, windowHeight - 1));
 	bottom.setFillColor(sf::Color::Black);
-	left.setSize(sf::Vector2f(1, windowY));
+	left.setSize(sf::Vector2f(1, windowHeight));
 	left.setPosition(sf::Vector2f(0, 0));
 	left.setFillColor(sf::Color::Black);
-	right.setSize(sf::Vector2f(1, windowY));
-	right.setPosition(sf::Vector2f(windowX - 1, 0));
+	right.setSize(sf::Vector2f(1, windowHeight));
+	right.setPosition(sf::Vector2f(windowWidth - 1, 0));
 	right.setFillColor(sf::Color::Black);
 
+	return true;
+}
 
+int Game::Update()
+{
+	Paddle paddle;
+	paddle.pShape.setSize(sf::Vector2f(120.f, 15.f));
+	paddle.pShape.setFillColor(sf::Color::Yellow);
+	paddle.pShape.setPosition(windowHeight - (windowHeight / 5), windowWidth / 2);
+	//setup ball
+	Ball ball;
+	ball.ballshape.setRadius(ball.ballRadius);
+	ball.ballshape.setPosition(paddle.pShape.getPosition().x, paddle.pShape.getPosition().y - 75);
+	ball.ballshape.setFillColor(sf::Color::Cyan);
+	ball.ballVelocity.x = rand() % 10;
+	ball.ballVelocity.y = -5;
+	
 	//code to run whilst window is open
 	while (window.isOpen())
 	{
-		//check if left is pressed
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+		//using mouse to control paddle psotiion!
+		if (sf::Mouse::getPosition(window).x > paddle.pShape.getSize().x / 2 && sf::Mouse::getPosition(window).x < window.getSize().x - paddle.pShape.getSize().x / 2)
 		{
-			//move left
-			rectPos.x -= speed;
-			//if our position is outside window come back
-			if (rectPos.x <= 0)
-			{
-				rectPos.x = 0;
-			}
-			paddle.setPosition(rectPos);
+			paddle.pShape.setPosition(sf::Mouse::getPosition(window).x - paddle.pShape.getSize().x / 2, paddle.pShape.getPosition().y);
 		}
-		//check if right is pressed
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
-		{
-			//move right
-			rectPos.x += speed;
-			//if our position is outside window come back
-			if (rectPos.x >= windowX - rectSize.x)
-			{
-				rectPos.x = windowX - rectSize.x;
-			}
-			paddle.setPosition(rectPos);
-		}
+		//move ball
+		ball.ballshape.move(ball.ballVelocity);
 		
-		if (top.getGlobalBounds().intersects(ball.getGlobalBounds()))
+		if (top.getGlobalBounds().intersects(ball.ballshape.getGlobalBounds()))
 		{
 			//did we hit top
-			velocity.y = -velocity.y;
+			ball.Bounce(0, top, ball.ballshape);
+			sound.setBuffer(wallSB);
+			sound.play();
 		}
-		if (bottom.getGlobalBounds().intersects(ball.getGlobalBounds()))
+		if (bottom.getGlobalBounds().intersects(ball.ballshape.getGlobalBounds()))
 		{
 			//did we hit bottom
-			velocity.y = -velocity.y;
+			ball.Bounce(0, bottom, ball.ballshape);
+			lives -= 1;
+			if (lives == 0)
+			{
+				//game over
+				return 1;
+			}
 		}
-		if (left.getGlobalBounds().intersects(ball.getGlobalBounds()) || right.getGlobalBounds().intersects(ball.getGlobalBounds()))
+		if (left.getGlobalBounds().intersects(ball.ballshape.getGlobalBounds()) || 
+			right.getGlobalBounds().intersects(ball.ballshape.getGlobalBounds()))
 		{
 			//left or right
-			velocity.x = -velocity.x;
+			ball.Bounce(1, left, ball.ballshape);
+			sound.setBuffer(wallSB);
+			sound.play();
 		}
-		if (paddle.getGlobalBounds().intersects(ball.getGlobalBounds()))
+		if (paddle.pShape.getGlobalBounds().intersects(ball.ballshape.getGlobalBounds()))
 		{
 			//did paddle hit ball
-			velocity.y = -velocity.y;
+			ball.Bounce(0, paddle.pShape, ball.ballshape);
+			sound.setBuffer(paddleSB);
+			sound.play();
 		}
-		ball.move(velocity); //move ball around
+		//collision with bricks
+		for (int i = 0; i < Bricks.size(); i++)
+		{
+			if (Bricks[i].bShape.getGlobalBounds().intersects(ball.ballshape.getGlobalBounds()))
+			{
+				ball.Bounce(0, Bricks[i].bShape, ball.ballshape);
+				Bricks[i].bShape.setPosition(1200, 0);
+				score += 1;
+				ball.ballVelocity = ball.ballVelocity * 1.03f;
+				if (score == 30)
+				{
+					return 1;
+				}
+				sound.setBuffer(bricksSB);
+				sound.play();
+			}
+				
+		}
+
 		
 		//PollEvent is our window updating event
 		sf::Event event;
@@ -110,10 +165,19 @@ int main()
 				window.close();
 		}
 
+		scoreText.setString("Score: " + std::to_string(score));
+		livesText.setString("Lives: " + std::to_string(lives));
+
 		//clear our window, and redraw everything
 		window.clear();
-		window.draw(paddle);
-		window.draw(ball);
+		for (int i = 0; i < Bricks.size(); i++)
+		{
+			window.draw(Bricks[i].bShape);
+		}
+		window.draw(scoreText);
+		window.draw(livesText);
+		window.draw(paddle.pShape);
+		window.draw(ball.ballshape);
 		window.display();
 	}
 

@@ -1,37 +1,20 @@
 ﻿  Source.cpp
-D:\timmy\Documents\20T2GAD173\Project1\Project1\Source.cpp(30,22): warning C4244: '=': conversion from 'int' to 'T', possible loss of data
+D:\timmy\Documents\20T2GAD173\Project1\Project1\BreakoutMain.h(21,9): warning C4244: 'initializing': conversion from 'T' to 'int', possible loss of data
           with
           [
               T=float
           ]
-D:\timmy\Documents\20T2GAD173\Project1\Project1\Source.cpp(40,27): warning C4244: 'argument': conversion from 'int' to 'T', possible loss of data
+D:\timmy\Documents\20T2GAD173\Project1\Project1\Source.cpp(36,35): warning C4244: 'argument': conversion from 'float' to 'unsigned int', possible loss of data
+D:\timmy\Documents\20T2GAD173\Project1\Project1\Source.cpp(36,22): warning C4244: 'argument': conversion from 'float' to 'unsigned int', possible loss of data
+D:\timmy\Documents\20T2GAD173\Project1\Project1\Source.cpp(41,12): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+D:\timmy\Documents\20T2GAD173\Project1\Project1\Source.cpp(49,37): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+D:\timmy\Documents\20T2GAD173\Project1\Project1\Source.cpp(55,37): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+D:\timmy\Documents\20T2GAD173\Project1\Project1\Source.cpp(61,37): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+D:\timmy\Documents\20T2GAD173\Project1\Project1\Source.cpp(92,31): warning C4244: '=': conversion from 'int' to 'T', possible loss of data
           with
           [
               T=float
           ]
-D:\timmy\Documents\20T2GAD173\Project1\Project1\Source.cpp(43,30): warning C4244: 'argument': conversion from 'int' to 'T', possible loss of data
-          with
-          [
-              T=float
-          ]
-D:\timmy\Documents\20T2GAD173\Project1\Project1\Source.cpp(44,45): warning C4244: 'argument': conversion from 'int' to 'T', possible loss of data
-          with
-          [
-              T=float
-          ]
-D:\timmy\Documents\20T2GAD173\Project1\Project1\Source.cpp(46,31): warning C4244: 'argument': conversion from 'int' to 'T', possible loss of data
-          with
-          [
-              T=float
-          ]
-D:\timmy\Documents\20T2GAD173\Project1\Project1\Source.cpp(49,32): warning C4244: 'argument': conversion from 'int' to 'T', possible loss of data
-          with
-          [
-              T=float
-          ]
-D:\timmy\Documents\20T2GAD173\Project1\Project1\Source.cpp(50,41): warning C4244: 'argument': conversion from 'int' to 'T', possible loss of data
-          with
-          [
-              T=float
-          ]
+D:\timmy\Documents\20T2GAD173\Project1\Project1\Source.cpp(140,21): warning C4018: '<': signed/unsigned mismatch
+D:\timmy\Documents\20T2GAD173\Project1\Project1\Source.cpp(173,21): warning C4018: '<': signed/unsigned mismatch
   Project1.vcxproj -> D:\timmy\Documents\20T2GAD173\Project1\Debug\Breakoutclone.exe
